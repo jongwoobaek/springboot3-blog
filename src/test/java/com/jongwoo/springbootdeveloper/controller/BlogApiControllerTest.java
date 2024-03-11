@@ -20,7 +20,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -66,5 +68,26 @@ class BlogApiControllerTest {
         assertThat(articles.size()).isEqualTo(1);
         assertThat(articles.get(0).getTitle()).isEqualTo(title);
         assertThat(articles.get(0).getContent()).isEqualTo(content);
+    }
+
+    @DisplayName("findAllArticles: 블로그 글 목록 조회에 성겅한다.")
+    @Test
+    public void findAllArticlesTest() throws Exception {
+        final String url = "/api/articles";
+        final String title = "title";
+        final String content = "content";
+
+        blogRepository.save(Article.builder()
+                .title(title)
+                .content(content)
+                .build());
+
+        final ResultActions result = mockMvc.perform(get(url)
+                .accept(MediaType.APPLICATION_JSON));
+
+        result
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].content").value(content))
+                .andExpect(jsonPath("$[0].title").value(title));
     }
 }
